@@ -1,0 +1,15 @@
+{
+  "name": "ilias-aegis-v2",
+  "version": "2.0.0-phase1",
+  "private": true,
+  "description": "ILias AEGIS v2 1단계 — 현장·관리·전광판·매핑 금고 분리(상위 폴더 node_modules 재사용)",
+  "scripts": {
+    "start": "node src/server.js all",
+    "start:field": "node src/server.js field",
+    "start:admin": "node src/server.js admin",
+    "start:board": "node src/server.js board",
+    "start:vault": "node src/server.js vault",
+    "seed:demo": "node scripts/seed-demo.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js"
+  }
+}

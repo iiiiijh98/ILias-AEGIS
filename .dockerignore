@@ -1,0 +1,7 @@
+data
+keys
+backups
+caddy-data
+certs
+.env
+*.csv

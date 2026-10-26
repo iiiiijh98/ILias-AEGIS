@@ -1,0 +1,48 @@
+# ILias AEGIS v2 회사 서버판 (docker compose v2). 시작: ./aegis.sh up
+# - aegis: 4개 앱(현장·관리·전광판·매핑 금고)이 컨테이너 안 127.0.0.1:3201~3204 에서만 대기
+# - caddy: aegis와 같은 네트워크 공간(network_mode)에서 HTTPS 443/8443/8444 를 받아 전달
+# - 매핑 금고(9444)는 호스트의 127.0.0.1 에만 공개(서버 콘솔/SSH 터널 전용)
+# - Postgres는 쓰지 않습니다(SQLite 전용, Postgres 경로는 미검증).
+name: aegis-v2
+services:
+  aegis:
+    build: .
+    image: aegis-v2-server:2.0.0
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      AEGIS_DATA_DIR: /var/lib/aegis/data
+      AEGIS_KEYS_DIR: /var/lib/aegis/keys
+      AEGIS_BACKUP_DIR: /var/backups/aegis
+      AEGIS_CADDYFILE: /etc/aegis/caddy/Caddyfile
+      AEGIS_CADDY_DIR: /data/caddy
+      AEGIS_TLS_CERT: /certs/cert.pem
+      AEGIS_TLS_KEY: /certs/key.pem
+      # 컨테이너 안에서는 0.0.0.0 으로 받되, 아래 ports 에서 호스트 127.0.0.1 에만 공개
+      AEGIS_VAULT_BIND: 0.0.0.0
+      # 호스트 127.0.0.1 → 컨테이너로 들어오는 연결은 도커 브리지 주소로 보이므로 그 대역을 허용(호스트 밖에서는 포트가 닫혀 있음)
+      AEGIS_VAULT_ALLOW_CIDRS: "${AEGIS_VAULT_ALLOW_CIDRS:-},172.16.0.0/12"
+    volumes:
+      - ./data:/var/lib/aegis/data
+      - ./keys:/var/lib/aegis/keys
+      - ./backups:/var/backups/aegis
+      - caddyconf:/etc/aegis/caddy
+    ports:
+      - "${AEGIS_HTTPS_FIELD_PORT:-443}:${AEGIS_HTTPS_FIELD_PORT:-443}"
+      - "${AEGIS_HTTPS_ADMIN_PORT:-8443}:${AEGIS_HTTPS_ADMIN_PORT:-8443}"
+      - "${AEGIS_HTTPS_BOARD_PORT:-8444}:${AEGIS_HTTPS_BOARD_PORT:-8444}"
+      - "127.0.0.1:${AEGIS_HTTPS_VAULT_PORT:-9444}:${AEGIS_HTTPS_VAULT_PORT:-9444}"
+  caddy:
+    image: caddy:2.11.7
+    restart: unless-stopped
+    network_mode: "service:aegis"
+    depends_on:
+      aegis:
+        condition: service_healthy
+    command: ["caddy", "run", "--config", "/etc/aegis/caddy/Caddyfile", "--adapter", "caddyfile"]
+    volumes:
+      - caddyconf:/etc/aegis/caddy:ro
+      - ./caddy-data:/data
+      - ./certs:/certs:ro
+volumes:
+  caddyconf: {}

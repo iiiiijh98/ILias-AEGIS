@@ -1,0 +1,62 @@
+# Local configuration and credentials (keep sanitized examples)
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+!.env.*.example
+!*.env.example
+!env.example
+.npmrc
+
+# Runtime data, encryption keys, backups, and Caddy state
+data/
+keys/
+backups/
+caddy-data/
+aegis-backup-*/
+aegis-keys-*/
+secrets.json*
+setup_code.txt*
+audit_anchors.jsonl*
+
+# TLS material (keep certificate installation instructions)
+certs/*
+!certs/README.txt
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+id_rsa*
+id_ed25519*
+
+# Databases, sidecars, and intake/export files
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.sql
+*.csv
+
+# Installed dependencies and generated output
+node_modules/
+coverage/
+.nyc_output/
+*.log
+logs/
+*.pid
+*.pid.lock
+*.tmp
+*.bak
+*.swp
+*~
+
+# Local editor and OS files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
